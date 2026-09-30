@@ -5,7 +5,7 @@ Welcome to **Cuber Hub** — a website made for Rubik's Cube enthusiasts and spe
 ## 🌐 Website
 
 Visit the website:
-https://a4ashishh.github.io/cuber-hub-website/
+https://a4ashishh.github.io/cuber_hub/
 
 ## ✨ Features
 
