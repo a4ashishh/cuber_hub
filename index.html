@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuber Hub</title>
+<style>
+:root{--bg:#141c28;--panel:#1d2838;--line:#2c3a4f;--text:#eef2f7;--muted:#9aa9bd;
+--w:#f4f4f4;--y:#ffd500;--r:#e63b2e;--o:#ff8a1f;--g:#1fb85a;--b:#2f6fe4}
+:root[data-theme="light"]{--bg:#eef2f7;--panel:#ffffff;--line:#d7dee8;--text:#141c28;--muted:#5c6b80}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:"Trebuchet MS","Segoe UI",sans-serif;line-height:1.5;
+  background:
+    radial-gradient(700px 420px at 18% -8%, rgba(47,111,228,.28), transparent 60%),
+    radial-gradient(600px 380px at 100% 8%, rgba(255,213,0,.12), transparent 55%),
+    var(--bg)}
+.hero{text-align:center;padding:18px 0 8px}
+.cube3d{margin:0 auto 18px;width:120px;height:120px;perspective:600px}
+.cubewrap{width:100%;height:100%;position:relative;transform-style:preserve-3d;
+  animation:spin 11s linear infinite;transform:rotateX(-28deg) rotateY(0deg)}
+@keyframes spin{to{transform:rotateX(-28deg) rotateY(360deg)}}
+.cf{position:absolute;width:120px;height:120px;border:3px solid #0b111a;border-radius:10px;
+  background-image:linear-gradient(#0b111a,#0b111a),linear-gradient(#0b111a,#0b111a);
+  background-size:calc(33.33% - 2px) calc(33.33% - 2px);background-repeat:space}
+.cf.u{background-color:var(--w);transform:rotateX(90deg) translateZ(60px)}
+.cf.d{background-color:var(--y);transform:rotateX(-90deg) translateZ(60px)}
+.cf.f{background-color:var(--g);transform:translateZ(60px)}
+.cf.b{background-color:var(--b);transform:rotateY(180deg) translateZ(60px)}
+.cf.l{background-color:var(--o);transform:rotateY(-90deg) translateZ(60px)}
+.cf.r{background-color:var(--r);transform:rotateY(90deg) translateZ(60px)}
+h1 .accent{background:linear-gradient(90deg,var(--y),var(--o));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ic{display:block;width:30px;height:30px;margin-bottom:10px;border-radius:8px;background:var(--b);position:relative;flex:none}
+.ic::before{content:"";position:absolute;inset:8px;border:2px solid #fff;border-radius:3px}
+.ic-timer{background:var(--b)}.ic-stats{background:var(--g)}.ic-algs{background:var(--o)}
+.ic-f2l{background:var(--r)}.ic-trainer{background:#a259ff}.ic-learn{background:#00b8b0}
+.ic-timer::before{border-radius:50%}
+.ic-settings{background:#5c6b80}
+.ic-settings::before{border-radius:50%;inset:6px;border-width:3px;border-style:dashed}
+.ic-news{background:#e0455c}
+.ic-news::before{border:0;background:linear-gradient(#fff,#fff);background-size:100% 2px;background-repeat:no-repeat;background-position:6px,12px,18px;box-shadow:0 6px 0 -3px #fff,0 12px 0 -3px #fff}
+.ic-stats::before{border:0;background:linear-gradient(to top,#fff 35%,transparent 35%),linear-gradient(to top,#fff 60%,transparent 60%),linear-gradient(to top,#fff 15%,transparent 15%);background-size:33% 100%;background-position:0 100%,33% 100%,66% 100%;background-repeat:no-repeat}
+.ic-learn::before{border-radius:3px 3px 3px 12px}
+#welcomeStrip .card{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+#welcomeStrip .wstat{text-align:center}
+#welcomeStrip .wstat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+#welcomeStrip .wstat small{color:var(--muted)}
+nav{display:flex;gap:6px;justify-content:center;padding:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;color:var(--muted);font:inherit;font-size:16px;padding:8px 16px;border-radius:8px;cursor:pointer}
+nav button:hover{color:var(--text)}
+nav button.on{background:var(--b);color:#fff}
+button:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+section{display:none}section.on{display:block}
+h1{font-size:clamp(34px,7vw,56px);margin:0 0 8px;letter-spacing:-1px}
+h2{margin:0 0 14px}
+p.sub{color:var(--muted);font-size:18px;margin:0 0 26px}
+.face{display:grid;grid-template-columns:repeat(3,44px);gap:4px;margin:0 0 26px}
+.face i{width:44px;height:44px;border-radius:6px;display:block}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.links button{text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--text);font:inherit;padding:18px;border-radius:12px;cursor:pointer;transition:transform .15s,border-color .15s}
+.links button:hover{border-color:var(--b);transform:translateY(-2px)}
+.links b{display:block;font-size:18px}.links span{color:var(--muted);font-size:14px}
+.scr{font-family:Consolas,monospace;font-size:clamp(18px,4vw,24px);text-align:center;min-height:64px;padding:8px}
+#time{font-size:clamp(70px,20vw,140px);text-align:center;font-weight:700;font-variant-numeric:tabular-nums;padding:36px 8px;border-radius:14px;user-select:none;cursor:pointer;touch-action:manipulation}
+#time.insp{color:var(--y)}
+#time.hold{color:var(--r)}#time.ready{color:var(--g)}
+.hint{text-align:center;color:var(--muted);margin:6px 0 18px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--text);font:inherit;padding:8px 16px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--b)}
+.last{text-align:center;margin-top:22px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:26px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card small{color:var(--muted)}.card div{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+td.sc{font-family:Consolas,monospace;font-size:12px;color:var(--muted);word-break:break-word}
+.x{background:none;border:0;color:var(--r);cursor:pointer;font-size:16px}
+.step{background:var(--panel);border-left:5px solid var(--b);border-radius:8px;padding:12px 16px;margin-bottom:10px}
+.step b{display:block}.step span{color:var(--muted)}
+.empty{color:var(--muted);padding:20px 0}
+.btn.on{background:var(--b);border-color:var(--b)}
+.alg{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.alg.done{border-color:var(--g)}
+.alg .nm{min-width:96px;font-weight:700}
+.alg .mv{flex:1;font-family:Consolas,monospace;font-size:15px;word-break:break-word}
+.alg svg,.nopic{flex:none;width:64px;height:64px}
+.trcase{display:flex;flex-direction:column;align-items:center;margin:8px 0}
+.trcase svg{width:220px;height:220px}
+.trname{font-weight:700;font-size:20px;margin-top:8px}
+.f2lcard{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;flex-wrap:wrap}
+.f2lcard .mv{font-family:Consolas,monospace}
+.f2lcard .desc{color:var(--muted);font-size:14px;max-width:220px}
+.trtime{font-size:56px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;cursor:pointer;user-select:none;touch-action:manipulation}
+.alg input{width:20px;height:20px;accent-color:var(--g);cursor:pointer}
+.setgroup{margin-bottom:28px}
+.setgroup h3{margin:0 0 10px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.setrow{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.setrow select,.setrow input[type=number]{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+.setrow input[type=checkbox]{width:20px;height:20px;accent-color:var(--b);cursor:pointer}
+.newsitem{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--y);border-radius:8px;padding:12px 16px;margin-bottom:10px}
+.newsitem .nt{font-weight:700;display:block}
+.newsitem .nd{color:var(--muted);font-size:14px}
+.newslink{display:block;color:var(--b);text-decoration:none;margin-bottom:6px}
+.newslink:hover{text-decoration:underline}
+.movecard{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.movecard b.big{font-size:22px}
+.movecard .desc{color:var(--muted);font-size:14px}
+.moveicon{position:relative;width:64px;height:64px;flex:none}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2px;width:100%;height:100%;background:#0b111a;border-radius:8px;padding:3px}
+.mgrid i{background:var(--fc);border-radius:2px;display:block}
+.marrow{position:absolute;right:-8px;bottom:-8px;font-size:20px;line-height:1;background:var(--bg);border:2px solid var(--line);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--text)}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <button data-go="home" class="on">Home</button>
+  <button data-go="timer">Timer</button>
+  <button data-go="stats">Stats</button>
+  <button data-go="algs">Algorithms</button>
+  <button data-go="f2l">F2L</button>
+  <button data-go="trainer">Trainer</button>
+  <button data-go="learn">Learn</button>
+  <button data-go="news">News</button>
+  <button data-go="settings">⚙</button>
+</nav>
+<main>
+
+<section id="home" class="on">
+  <div class="hero">
+    <div class="cube3d" aria-hidden="true">
+      <div class="cubewrap">
+        <div class="cf u"></div><div class="cf d"></div><div class="cf f"></div>
+        <div class="cf b"></div><div class="cf l"></div><div class="cf r"></div>
+      </div>
+    </div>
+    <h1>Cuber<span class="accent">Hub</span></h1>
+    <p class="sub">Time your solves, track your averages, and learn the next method.</p>
+  </div>
+
+  <div id="welcomeStrip"></div>
+
+  <div class="links">
+    <button data-go="timer"><i class="ic ic-timer"></i><b>Timer</b><span>Hold space, release to start. 3×3 scrambles.</span></button>
+    <button data-go="stats"><i class="ic ic-stats"></i><b>Stats</b><span>Best, Ao5, Ao12, Ao50, Ao100 and history.</span></button>
+    <button data-go="algs"><i class="ic ic-algs"></i><b>Algorithms</b><span>2-look &amp; 1-look OLL, plus PLL, with a learned checklist.</span></button>
+    <button data-go="f2l"><i class="ic ic-f2l"></i><b>F2L</b><span>Six basic corner-edge cases for the front-right slot.</span></button>
+    <button data-go="trainer"><i class="ic ic-trainer"></i><b>Trainer</b><span>Random OLL and PLL cases with a timer.</span></button>
+    <button data-go="learn"><i class="ic ic-learn"></i><b>Learn</b><span>Beginner method and the CFOP steps.</span></button>
+    <button data-go="news"><i class="ic ic-news"></i><b>News</b><span>Current world records and how to keep it updated.</span></button>
+    <button data-go="settings"><i class="ic ic-settings"></i><b>Settings</b><span>Theme, sound, timer feel and resetting your data.</span></button>
+  </div>
+</section>
+
+<section id="timer">
+  <div class="scr" id="scramble"></div>
+  <div id="time" tabindex="0" role="timer" aria-live="off">0.00</div>
+  <p class="hint" id="hint">Hold space (or press and hold the time) until it turns green, then release.</p>
+  <p class="hint"><label><input type="checkbox" id="inspCheck" checked> Inspection (15 s)</label></p>
+  <div class="row">
+    <button class="btn" id="newScr">New scramble</button>
+    <button class="btn" id="copyScr">Copy scramble</button>
+  </div>
+  <div class="last" id="last"></div>
+  <div class="row" id="pen" style="margin-top:10px;display:none">
+    <button class="btn" id="plus2">+2</button>
+    <button class="btn" id="dnf">DNF</button>
+    <button class="btn" id="del">Delete solve</button>
+  </div>
+</section>
+
+<section id="stats">
+  <h2>Your stats</h2>
+  <div id="statBody"></div>
+</section>
+
+<section id="algs">
+  <h2>Algorithms</h2>
+  <div class="row" style="justify-content:flex-start;margin-bottom:8px">
+    <button class="btn on" data-set="oll">2-look OLL</button>
+    <button class="btn" data-set="oll57">1-look OLL (all 57)</button>
+    <button class="btn" data-set="pll">PLL</button>
+    <button class="btn" data-set="basic">Basic</button>
+  </div>
+  <p class="sub" style="font-size:15px;margin-bottom:16px">Hold the cube with white on the bottom and yellow on top (or match your own layout). x = rotate the whole cube like an R turn, M = middle slice turned like L. On OLL pictures, yellow means the sticker is already oriented. On PLL pictures, arrows show where pieces move. The pictures show the top of the cube from above, with the front at the bottom. Check any algorithm against a trusted source such as J Perm or SpeedSolving before you memorise it.</p>
+  <div id="algList"></div>
+  <p class="hint" id="algCount"></p>
+</section>
+
+<section id="trainer">
+  <h2>Case trainer</h2>
+  <div class="row" style="justify-content:flex-start;margin-bottom:8px">
+    <button class="btn on" data-tr="oll">2-look OLL</button>
+    <button class="btn" data-tr="oll57">1-look OLL</button>
+    <button class="btn" data-tr="pll">PLL</button>
+  </div>
+  <p class="hint" style="text-align:left"><label><input type="checkbox" id="trLearned"> Only cases I have marked as learned</label></p>
+  <div id="trCase" class="trcase"></div>
+  <div id="trTime" class="trtime" role="timer">0.00</div>
+  <p class="hint" id="trInfo"></p>
+  <div id="trAlg" class="scr"></div>
+  <div class="row">
+    <button class="btn" id="trReveal">Show algorithm</button>
+    <button class="btn" id="trNext">Skip case</button>
+  </div>
+  <p class="hint" id="trCount"></p>
+</section>
+
+<section id="f2l">
+  <h2>F2L — front-right slot</h2>
+  <p class="sub" style="font-size:15px;margin-bottom:16px">Six basic cases for pairing a corner and edge and inserting them into the front-right slot. The grid is the top of the cube seen from above, front at the bottom; the dashed cell is the slot the pair is heading for. White (the corner's other colour) marks the sticker facing outward or down.</p>
+  <div id="f2lList"></div>
+</section>
+
+<section id="learn">
+  <h2>Move notation</h2>
+  <p class="hint" style="text-align:left;margin-bottom:14px">Each letter is a face. Turn it 90° clockwise, facing it directly.</p>
+  <div id="moveList"></div>
+  <p class="hint" style="text-align:left;margin:6px 0 30px">
+    <b>R'</b> = same face, other way. <b>R2</b> = turn it twice.
+  </p>
+  <h2>Beginner method</h2>
+  <div class="step"><b>1. White cross</b><span>Place the four white edges around the white centre, matching the side colours.</span></div>
+  <div class="step"><b>2. White corners</b><span>Insert the four white corners to finish the first layer.</span></div>
+  <div class="step"><b>3. Middle layer</b><span>Move the four edge pieces into the middle layer.</span></div>
+  <div class="step"><b>4. Yellow cross</b><span>Make a yellow cross on the top face.</span></div>
+  <div class="step"><b>5. Yellow face</b><span>Orient the last-layer corners so the whole top is yellow.</span></div>
+  <div class="step"><b>6. Position corners</b><span>Swap the last-layer corners into their correct places.</span></div>
+  <div class="step"><b>7. Position edges</b><span>Cycle the last edges to finish the cube.</span></div>
+  <h2 style="margin-top:32px">CFOP (speedsolving)</h2>
+  <div class="step" style="border-color:var(--g)"><b>Cross</b><span>Solve the cross on the bottom in under 8 moves.</span></div>
+  <div class="step" style="border-color:var(--g)"><b>F2L</b><span>Solve corner and edge pairs together, so you finish two layers.</span></div>
+  <div class="step" style="border-color:var(--g)"><b>OLL</b><span>Make the whole last layer one colour (57 cases).</span></div>
+  <div class="step" style="border-color:var(--g)"><b>PLL</b><span>Permute the last layer pieces into place (21 cases).</span></div>
+</section>
+
+<section id="news">
+  <h2>News &amp; records</h2>
+  <p class="hint" style="text-align:left;margin-bottom:18px">
+    Hand-updated, not live — the browser can't safely pull outside news on its own.
+    Last checked: <b id="newsDate"></b>.
+  </p>
+  <div id="newsList"></div>
+  <div class="setgroup">
+    <h3>Keeping this current</h3>
+    <p class="hint" style="text-align:left">
+      Open <code>index.html</code> in VS Code, find the <code>NEWS</code> list near the bottom of the
+      <code>&lt;script&gt;</code> section, and edit the entries. Good places to check for updates:
+    </p>
+    <div id="newsLinks"></div>
+  </div>
+</section>
+
+<section id="settings">
+  <h2>Settings</h2>
+
+  <div class="setgroup">
+    <h3>Appearance</h3>
+    <label class="setrow"><span>Theme</span>
+      <select id="setTheme"><option value="dark">Dark</option><option value="light">Light</option></select>
+    </label>
+  </div>
+
+  <div class="setgroup">
+    <h3>Timer</h3>
+    <label class="setrow"><span>Default inspection (15 s)</span>
+      <input type="checkbox" id="setInsp">
+    </label>
+    <label class="setrow"><span>Inspection beeps at 8 s / 12 s</span>
+      <input type="checkbox" id="setBeep">
+    </label>
+    <label class="setrow"><span>Hold time before ready (ms)</span>
+      <input type="number" id="setHold" min="0" max="1000" step="50" style="width:80px">
+    </label>
+  </div>
+
+  <div class="setgroup">
+    <h3>Data</h3>
+    <p class="hint" style="text-align:left;margin:0 0 10px">
+      Everything is stored only in this browser — solves, learned algorithms, and best times.
+    </p>
+    <div class="row" style="justify-content:flex-start">
+      <button class="btn" id="setReset">Reset all data</button>
+    </div>
+    <p class="hint" id="setResetMsg" style="text-align:left"></p>
+  </div>
+</section>
+
+</main>
+<script>
+// ---------- navigation ----------
+function go(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===id));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.go===id));
+  if(id==="stats")renderStats();
+  if(id==="algs")renderAlgs();
+  if(id==="f2l")renderF2L();
+  if(id==="home")renderWelcome();
+  if(id==="news")renderNews();
+  if(trState==="running"){cancelAnimationFrame(trRaf);trState="ready";}
+  if(id==="trainer"&&!trCur)nextCase();
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+
+// ---------- scramble (3x3) ----------
+const FACES=["U","D","R","L","F","B"], AXIS={U:0,D:0,R:1,L:1,F:2,B:2}, MODS=["","'","2"];
+function makeScramble(n=20){
+  const m=[];
+  while(m.length<n){
+    const f=FACES[Math.floor(Math.random()*6)];
+    if(m.length&&m[m.length-1][0]===f)continue;
+    // avoid patterns like R L R (same axis three in a row)
+    if(m.length>1&&AXIS[m[m.length-1][0]]===AXIS[f]&&m[m.length-2][0]===f)continue;
+    m.push(f+MODS[Math.floor(Math.random()*3)]);
+  }
+  return m.join(" ");
+}
+let scramble=makeScramble();
+const $=id=>document.getElementById(id);
+function newScramble(){scramble=makeScramble();$("scramble").textContent=scramble;}
+$("newScr").onclick=newScramble;
+$("copyScr").onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(scramble);$("copyScr").textContent="Copied";setTimeout(()=>$("copyScr").textContent="Copy scramble",1200);};
+$("scramble").textContent=scramble;
+
+// ---------- solves storage ----------
+let solves=[];
+try{solves=JSON.parse(localStorage.getItem("cuberhub.solves")||"[]")}catch(e){solves=[]}
+function save(){try{localStorage.setItem("cuberhub.solves",JSON.stringify(solves))}catch(e){}}
+// solve = {ms, pen:0|2000|"dnf", scr}
+const val=s=>s.pen==="dnf"?Infinity:s.ms+s.pen;
+const fmt=v=>{
+  if(v===Infinity)return "DNF";
+  if(v==null)return "-";
+  const s=v/1000;
+  if(s>=60){const m=Math.floor(s/60);return m+":"+(s-m*60).toFixed(2).padStart(5,"0");}
+  return s.toFixed(2);
+};
+
+// ---------- timer ----------
+let holdMs=300;
+try{holdMs=+localStorage.getItem("cuberhub.hold")||300}catch(e){}
+$("setHold").value=holdMs;
+$("setHold").onchange=()=>{
+  holdMs=Math.max(0,+$("setHold").value||0);$("setHold").value=holdMs;
+  try{localStorage.setItem("cuberhub.hold",holdMs)}catch(e){}
+};
+let state="idle",t0=0,raf=0,holdTimer=0;
+let usedInsp=false,inspStart=0,inspRaf=0,inspPen=0,curPen=0,beeped={};
+const tEl=$("time");
+
+// inspection setting (remembered in the browser)
+const inspOn=()=>$("inspCheck").checked;
+try{$("inspCheck").checked=localStorage.getItem("cuberhub.insp")!=="0"}catch(e){}
+function setInsp(on){
+  $("inspCheck").checked=on;$("setInsp").checked=on;
+  try{localStorage.setItem("cuberhub.insp",on?"1":"0")}catch(e){}
+  updateHint();
+}
+function updateHint(){
+  $("hint").textContent=inspOn()
+    ?"Tap space to start the 15 s inspection. Then hold space until green and release to solve."
+    :"Hold space (or press and hold the time) until it turns green, then release.";
+}
+$("inspCheck").onchange=()=>setInsp($("inspCheck").checked);
+$("setInsp").onchange=()=>setInsp($("setInsp").checked);
+$("setInsp").checked=inspOn();
+updateHint();
+
+function tick(){tEl.textContent=fmt(performance.now()-t0);raf=requestAnimationFrame(tick);}
+
+// beep at 8 s and 12 s of inspection, like a WCA judge
+let beepOn=true;
+try{beepOn=localStorage.getItem("cuberhub.beep")!=="0"}catch(e){}
+$("setBeep").checked=beepOn;
+$("setBeep").onchange=()=>{
+  beepOn=$("setBeep").checked;
+  try{localStorage.setItem("cuberhub.beep",beepOn?"1":"0")}catch(e){}
+};
+function beep(){
+  if(!beepOn)return;
+  try{
+    const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();
+    o.frequency.value=880;o.connect(c.destination);o.start();
+    setTimeout(()=>{o.stop();c.close();},160);
+  }catch(e){}
+}
+function inspTick(){
+  const sec=(performance.now()-inspStart)/1000;
+  if(sec<15){tEl.textContent=Math.ceil(15-sec);inspPen=0;}
+  else if(sec<17){tEl.textContent="+2";inspPen=2000;}
+  else{tEl.textContent="DNF";inspPen="dnf";}
+  [8,12].forEach(k=>{if(sec>=k&&!beeped[k]){beeped[k]=1;beep();}});
+  inspRaf=requestAnimationFrame(inspTick);
+}
+function startInsp(){
+  usedInsp=true;inspPen=0;beeped={};inspStart=performance.now();
+  state="inspecting";tEl.className="insp";
+  $("pen").style.display="none";$("last").textContent="";
+  inspTick();
+}
+function cancelInsp(){
+  cancelAnimationFrame(inspRaf);usedInsp=false;state="idle";
+  tEl.className="";tEl.textContent="0.00";
+}
+
+function press(){
+  if(state==="running"){stop();return;}
+  if(state==="idle"&&inspOn()){state="arming";tEl.className="hold";return;}
+  if(state!=="idle"&&state!=="inspecting")return;
+  state="holding";tEl.className="hold";
+  holdTimer=setTimeout(()=>{if(state==="holding"){state="ready";tEl.className="ready";}},holdMs);
+}
+function release(){
+  clearTimeout(holdTimer);
+  if(state==="arming"){startInsp();}
+  else if(state==="ready"){
+    curPen=0;
+    if(usedInsp){cancelAnimationFrame(inspRaf);curPen=inspPen;usedInsp=false;}
+    state="running";tEl.className="";t0=performance.now();
+    $("pen").style.display="none";$("last").textContent="";tick();
+  }
+  else if(state==="holding"){
+    state=usedInsp?"inspecting":"idle";
+    tEl.className=usedInsp?"insp":"";
+  }
+  else if(state==="stopped"){state="idle";}
+}
+function stop(){
+  cancelAnimationFrame(raf);
+  const ms=performance.now()-t0;
+  tEl.textContent=fmt(ms);
+  solves.push({ms,pen:curPen,scr:scramble});curPen=0;save();
+  state="stopped";showLast();newScramble();
+}
+function showLast(){
+  const s=solves[solves.length-1];
+  if(!s){$("pen").style.display="none";return;}
+  tEl.textContent=fmt(val(s));
+  $("last").textContent="Solve #"+solves.length+(s.pen===2000?" (+2)":"");
+  $("pen").style.display="flex";
+}
+$("plus2").onclick=()=>{const s=solves[solves.length-1];if(s){s.pen=s.pen===2000?0:2000;save();showLast();}};
+$("dnf").onclick=()=>{const s=solves[solves.length-1];if(s){s.pen=s.pen==="dnf"?0:"dnf";save();showLast();}};
+$("del").onclick=()=>{solves.pop();save();tEl.textContent="0.00";$("last").textContent="";$("pen").style.display="none";};
+
+const timerOn=()=>$("timer").classList.contains("on");
+document.addEventListener("keydown",e=>{
+  if(!timerOn())return;
+  if(e.code==="Escape"){if(state==="inspecting")cancelInsp();}
+  else if(e.code==="Space"){e.preventDefault();if(!e.repeat)press();}
+  else if(state==="running"&&!e.repeat){stop();}
+});
+document.addEventListener("keyup",e=>{if(timerOn()&&e.code==="Space"){e.preventDefault();release();}});
+tEl.addEventListener("pointerdown",e=>{e.preventDefault();press();});
+tEl.addEventListener("pointerup",release);
+tEl.addEventListener("pointerleave",()=>{
+  if(state==="arming"){state="idle";tEl.className="";}
+  else if(state==="holding"){release();}
+});
+
+// ---------- averages (WCA-style trimmed mean) ----------
+function avg(list){
+  const n=list.length,trim=n<=5?1:Math.ceil(n*0.05);
+  const v=list.map(val).sort((a,b)=>a-b);
+  const kept=v.slice(trim,n-trim);
+  if(kept.some(x=>x===Infinity))return Infinity;
+  return kept.reduce((a,b)=>a+b,0)/kept.length;
+}
+function lastAvg(n){return solves.length>=n?avg(solves.slice(-n)):null;}
+function bestAvg(n){
+  if(solves.length<n)return null;
+  let best=Infinity;
+  for(let i=0;i+n<=solves.length;i++){const a=avg(solves.slice(i,i+n));if(a<best)best=a;}
+  return best;
+}
+
+// ---------- move notation ----------
+const MOVES=[
+ {n:"U",name:"Up",c:"Y",desc:"Top layer."},
+ {n:"D",name:"Down",c:"W",desc:"Bottom layer."},
+ {n:"F",name:"Front",c:"G",desc:"Face towards you."},
+ {n:"B",name:"Back",c:"B",desc:"Face away from you."},
+ {n:"L",name:"Left",c:"O",desc:"Left face."},
+ {n:"R",name:"Right",c:"R",desc:"Right face."},
+];
+function renderMoves(){
+  $("moveList").innerHTML=MOVES.map(m=>
+    '<div class="movecard"><div class="moveicon" style="--fc:'+PP[m.c]+'"><div class="mgrid">'+'<i></i>'.repeat(9)+'</div><span class="marrow">↻</span></div>'+
+    '<div><b class="big">'+m.n+'</b> — '+m.name+'<div class="desc">'+m.desc+'</div></div></div>'
+  ).join("");
+}
+
+// ---------- news (edit these by hand — see the Settings hint) ----------
+const NEWS_UPDATED="29 September 2026";
+const NEWS=[
+ {t:"3x3 single world record: 2.76 s",d:"Teodor Zajder (Poland) — GLS Big Cubes Gdańsk 2026, February 2026."},
+ {t:"3x3 average world record: 3.51 s",d:"Yiheng Wang (China) — Hefei Cubing League 3x3 III 2026, June 2026."},
+ {t:"3x3 average, earlier record: 3.71 s",d:"Xuanyi Geng (China), age 7, at the time the youngest to hold the 3x3 average record — Deqing Small & Special 2026, April 2026."},
+ {t:"2x2 single world record: 0.39 s",d:"Ziyu Ye (China) — Hefei Open 2025, October 2025."},
+];
+const NEWS_LINKS=[
+ {t:"World Cube Association — official records & upcoming competitions",u:"https://www.worldcubeassociation.org/results/records"},
+ {t:"Wikipedia — List of world records in speedcubing",u:"https://en.wikipedia.org/wiki/List_of_world_records_in_speedcubing"},
+ {t:"J Perm on YouTube — news, tutorials and reviews",u:"https://www.youtube.com/@JPerm"},
+];
+function renderNews(){
+  $("newsDate").textContent=NEWS_UPDATED;
+  $("newsList").innerHTML=NEWS.map(n=>'<div class="newsitem"><span class="nt">'+n.t+'</span><span class="nd">'+n.d+'</span></div>').join("");
+  $("newsLinks").innerHTML=NEWS_LINKS.map(l=>'<a class="newslink" href="'+l.u+'" target="_blank" rel="noopener">'+l.t+' ↗</a>').join("");
+}
+
+// ---------- welcome strip ----------
+function renderWelcome(){
+  const box=$("welcomeStrip");
+  if(!solves.length){box.innerHTML="";return;}
+  const vals=solves.map(val).filter(v=>v!==Infinity);
+  const best=vals.length?Math.min(...vals):null;
+  const ao5=lastAvg(5);
+  const w=(l,v)=>'<div class="wstat"><b>'+v+'</b><small>'+l+'</small></div>';
+  box.innerHTML='<div class="card">'+
+    w("Solves",solves.length)+w("Best single",fmt(best))+w("Current Ao5",fmt(ao5))+
+    '</div>';
+}
+// ---------- stats page ----------
+function renderStats(){
+  const box=$("statBody");
+  if(!solves.length){box.innerHTML='<p class="empty">No solves yet. Go to the Timer and complete your first solve.</p>';return;}
+  const vals=solves.map(val).filter(v=>v!==Infinity);
+  const best=vals.length?Math.min(...vals):null;
+  const worst=vals.length?Math.max(...vals):null;
+  const mean=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+  const card=(l,v)=>'<div class="card"><small>'+l+'</small><div>'+v+'</div></div>';
+  let h='<div class="cards">'+card("Best single",fmt(best))+card("Worst",fmt(worst))+card("Mean",fmt(mean))+card("Solves",solves.length)+'</div>';
+  h+='<div class="cards">';
+  [5,12,50,100].forEach(n=>{h+=card("Ao"+n+" (current / best)",fmt(lastAvg(n))+' / '+fmt(bestAvg(n)));});
+  h+='</div><h2>History</h2><table><tr><th>#</th><th>Time</th><th>Scramble</th><th></th></tr>';
+  for(let i=solves.length-1;i>=0;i--){
+    const s=solves[i];
+    h+='<tr><td>'+(i+1)+'</td><td>'+fmt(val(s))+(s.pen===2000?"+":"")+'</td><td class="sc">'+s.scr+'</td><td><button class="x" data-i="'+i+'" aria-label="Delete solve '+(i+1)+'">✕</button></td></tr>';
+  }
+  h+='</table><div class="row" style="margin-top:18px"><button class="btn" id="clearAll">Delete all solves</button></div>';
+  box.innerHTML=h;
+  box.querySelectorAll(".x").forEach(b=>b.onclick=()=>{solves.splice(+b.dataset.i,1);save();renderStats();});
+  $("clearAll").onclick=()=>{if(confirm("Delete all solves?")){solves=[];save();renderStats();}};
+}
+
+// ---------- algorithms ----------
+const ALGS=[
+ {g:"basic",n:"Sexy move",a:"R U R' U'"},
+ {g:"f2l",n:"F2L 1",a:"R U R'"},
+ {g:"f2l",n:"F2L 2",a:"F' U' F"},
+ {g:"f2l",n:"F2L 3",a:"U' F' U F"},
+ {g:"f2l",n:"F2L 4",a:"U R U' R'"},
+ {g:"f2l",n:"F2L 5",a:"U R U' R' U' F' U F"},
+ {g:"f2l",n:"F2L 6",a:"F' U' F U F' U' F"},
+ {g:"basic",n:"Sledgehammer",a:"R' F R F'"},
+ {g:"oll",n:"OLL: Line",a:"F R U R' U' F'"},
+ {g:"oll",n:"OLL: L-shape",a:"F U R U' R' F'"},
+ {g:"oll",n:"OLL: Dot",a:"F R U R' U' F' f R U R' U' f'"},
+ {g:"oll",n:"Sune",a:"R U R' U R U2 R'"},
+ {g:"oll",n:"Antisune",a:"R U2 R' U' R U' R'"},
+ {g:"oll57",n:"OLL 1",a:"R U2 R2 F R F' U2 R' F R F'"},
+ {g:"oll57",n:"OLL 2",a:"r U r' U2 r U2 R' U2 R U' r'"},
+ {g:"oll57",n:"OLL 3",a:"r' R2 U R' U r U2 r' U M'"},
+ {g:"oll57",n:"OLL 4",a:"M U' r U2 r' U' R U' R' M'"},
+ {g:"oll57",n:"OLL 5",a:"l' U2 L U L' U l"},
+ {g:"oll57",n:"OLL 6",a:"r U2 R' U' R U' r'"},
+ {g:"oll57",n:"OLL 7",a:"r U R' U R U2 r'"},
+ {g:"oll57",n:"OLL 8",a:"l' U' L U' L' U2 l"},
+ {g:"oll57",n:"OLL 9",a:"R U R' U' R' F R2 U R' U' F'"},
+ {g:"oll57",n:"OLL 10",a:"R U R' U R' F R F' R U2 R'"},
+ {g:"oll57",n:"OLL 11",a:"r' R2 U R' U R U2 R' U M'"},
+ {g:"oll57",n:"OLL 12",a:"M' R' U' R U' R' U2 R U' M"},
+ {g:"oll57",n:"OLL 13",a:"F U R U2 R' U' R U R' F'"},
+ {g:"oll57",n:"OLL 14",a:"R' F R U R' F' R F U' F'"},
+ {g:"oll57",n:"OLL 15",a:"l' U' l L' U' L U l' U l"},
+ {g:"oll57",n:"OLL 16",a:"r U r' R U R' U' r U' r'"},
+ {g:"oll57",n:"OLL 17",a:"R U R' U R' F R F' U2 R' F R F'"},
+ {g:"oll57",n:"OLL 18",a:"r U R' U R U2 r2 U' R U' R' U2 r"},
+ {g:"oll57",n:"OLL 19",a:"r' R U R U R' U' M' R' F R F'"},
+ {g:"oll57",n:"OLL 20",a:"r U R' U' M2 U R U' R' U' M'"},
+ {g:"oll57",n:"OLL 21",a:"R U R' U R U' R' U R U2 R'"},
+ {g:"oll57",n:"OLL 22",a:"R U2 R2 U' R2 U' R2 U2 R"},
+ {g:"oll57",n:"OLL 23",a:"R2 D R' U2 R D' R' U2 R'"},
+ {g:"oll57",n:"OLL 24",a:"r U R' U' r' F R F'"},
+ {g:"oll57",n:"OLL 25",a:"F' r U R' U' r' F R"},
+ {g:"oll57",n:"OLL 26",a:"R U2 R' U' R U' R'"},
+ {g:"oll57",n:"OLL 27",a:"R U R' U R U2 R'"},
+ {g:"oll57",n:"OLL 28",a:"r U R' U' M U R U' R'"},
+ {g:"oll57",n:"OLL 29",a:"R U R' U' R U' R' F' U' F R U R'"},
+ {g:"oll57",n:"OLL 30",a:"F R' F R2 U' R' U' R U R' F2"},
+ {g:"oll57",n:"OLL 31",a:"R' U' F U R U' R' F' R"},
+ {g:"oll57",n:"OLL 32",a:"R U B' U' R' U R B R'"},
+ {g:"oll57",n:"OLL 33",a:"R U R' U' R' F R F'"},
+ {g:"oll57",n:"OLL 34",a:"R U R2 U' R' F R U R U' F'"},
+ {g:"oll57",n:"OLL 35",a:"R U2 R2 F R F' R U2 R'"},
+ {g:"oll57",n:"OLL 36",a:"R' U' R U' R' U R U R B' R' B"},
+ {g:"oll57",n:"OLL 37",a:"F R' F' R U R U' R'"},
+ {g:"oll57",n:"OLL 38",a:"R U R' U R U' R' U' R' F R F'"},
+ {g:"oll57",n:"OLL 39",a:"R U R' F' U' F U R U2 R'"},
+ {g:"oll57",n:"OLL 40",a:"R' F R U R' U' F' U R"},
+ {g:"oll57",n:"OLL 41",a:"R U R' U R U2 R' F R U R' U' F'"},
+ {g:"oll57",n:"OLL 42",a:"R' U' R U' R' U2 R F R U R' U' F'"},
+ {g:"oll57",n:"OLL 43",a:"R' U' F' U F R"},
+ {g:"oll57",n:"OLL 44",a:"F U R U' R' F'"},
+ {g:"oll57",n:"OLL 45",a:"F R U R' U' F'"},
+ {g:"oll57",n:"OLL 46",a:"R' U' R' F R F' U R"},
+ {g:"oll57",n:"OLL 47",a:"R' U' R' F R F' R' F R F' U R"},
+ {g:"oll57",n:"OLL 48",a:"F R U R' U' R U R' U' F'"},
+ {g:"oll57",n:"OLL 49",a:"R B' R2 F R2 B R2 F' R"},
+ {g:"oll57",n:"OLL 50",a:"R' F R2 B' R2 F' R2 B R'"},
+ {g:"oll57",n:"OLL 51",a:"F U R U' R' U R U' R' F'"},
+ {g:"oll57",n:"OLL 52",a:"R U R' U R U' B U' B' R'"},
+ {g:"oll57",n:"OLL 53",a:"r' U' R U' R' U R U' R' U2 r"},
+ {g:"oll57",n:"OLL 54",a:"r U R' U R U' R' U R U2 r'"},
+ {g:"oll57",n:"OLL 55",a:"R U2 R2 U' R U' R' U2 F R F'"},
+ {g:"oll57",n:"OLL 56",a:"r U r' U R U' R' U R U' R' r U' r'"},
+ {g:"oll57",n:"OLL 57",a:"R U R' U' M' U R U' r'"},
+ {g:"pll",n:"T-Perm",a:"R U R' U' R' F R2 U' R' U' R U R' F'"},
+ {g:"pll",n:"Y-Perm",a:"F R U' R' U' R U R' F' R U R' U' R' F R F'"},
+ {g:"pll",n:"Ua-Perm",a:"R U' R U R U R U' R' U' R2"},
+ {g:"pll",n:"Ub-Perm",a:"R2 U R U R' U' R' U' R' U R'"},
+ {g:"pll",n:"H-Perm",a:"M2 U M2 U2 M2 U M2"},
+ {g:"pll",n:"Z-Perm",a:"M' U M2 U M2 U M' U2 M2"},
+ {g:"pll",n:"Aa-Perm",a:"x R' U R' D2 R U' R' D2 R2 x'"},
+ {g:"pll",n:"Ab-Perm",a:"x R2 D2 R U R' D2 R U' R x'"},
+ {g:"pll",n:"Ja-Perm",a:"x R2 F R F' R U2 r' U r U2 x'"},
+ {g:"pll",n:"Jb-Perm",a:"R U R' F' R U R' U' R' F R2 U' R'"},
+ {g:"pll",n:"Ra-Perm",a:"R U' R' U' R U R D R' U' R D' R' U2 R'"},
+ {g:"pll",n:"Rb-Perm",a:"R2 F R U R U' R' F' R U2 R' U2 R"},
+ {g:"pll",n:"F-Perm",a:"R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R"},
+ {g:"pll",n:"V-Perm",a:"R' U R' U' R D' R' D R' U D' R2 U' R2 D R2"},
+ {g:"pll",n:"E-Perm",a:"x' R U' R' D R U R' D' R U R' D R U' R' D' x"}
+];
+const DIAG={"OLL: Line":{"t":"RGYYYYRRY","b":"BYO","f":"GYO","l":"YOY","r":"BBG"},"OLL: L-shape":{"t":"YYOYYGYBO","b":"RRB","f":"RYG","l":"BOG","r":"YYY"},"OLL: Dot":{"t":"BORBYGGRR","b":"OYY","f":"OYY","l":"YYY","r":"BYG"},"Sune":{"t":"RYGYYYYYO","b":"YOO","f":"BGY","l":"GRR","r":"YBB"},"Antisune":{"t":"GYYYYYRYB","b":"RRG","f":"YGO","l":"YBB","r":"OOY"},"OLL 1":{"t":"BOGBYGRRR","b":"OYO","f":"GYB","l":"YYY","r":"YYY"},"OLL 2":{"t":"ROOBYGBRB","b":"YYY","f":"RYO","l":"GYY","r":"GYY"},"OLL 3":{"t":"GROBYGYOB","b":"YYB","f":"RYY","l":"OYG","r":"YYR"},"OLL 4":{"t":"ROGGYBBRY","b":"BYY","f":"YYO","l":"YYO","r":"RYG"},"OLL 5":{"t":"YYGYYGBOO","b":"GBO","f":"RYY","l":"RRY","r":"YYB"},"OLL 6":{"t":"GYYGYYRRB","b":"RBG","f":"YYO","l":"YYB","r":"OOY"},"OLL 7":{"t":"RYGYYGYOO","b":"YBO","f":"BYY","l":"GRR","r":"YYB"},"OLL 8":{"t":"GYOGYYRRY","b":"RBY","f":"YYB","l":"YYB","r":"GOO"},"OLL 9":{"t":"GYRYYGBBY","b":"RRY","f":"YYO","l":"YOO","r":"BYG"},"OLL 10":{"t":"BBYYYRRYG","b":"YYO","f":"GGY","l":"ROY","r":"BYO"},"OLL 11":{"t":"GOOBYYYYB","b":"YYB","f":"RGY","l":"OYG","r":"YRR"},"OLL 12":{"t":"YYGGYYBOO","b":"RBY","f":"YYG","l":"BYO","r":"RRY"},"OLL 13":{"t":"GGRYYYYOO","b":"YYG","f":"BYY","l":"ORR","r":"YBB"},"OLL 14":{"t":"RGOYYYBRY","b":"BYY","f":"YYG","l":"YOO","r":"GBR"},"OLL 15":{"t":"YGGYYYBOO","b":"GYO","f":"RYY","l":"RBY","r":"YRB"},"OLL 16":{"t":"GGYYYYRRB","b":"RYG","f":"YYO","l":"YOB","r":"OBY"},"OLL 17":{"t":"YBGGYOGRY","b":"RYY","f":"OYB","l":"BYY","r":"RYO"},"OLL 18":{"t":"YOYBYGORR","b":"BYB","f":"YYY","l":"OYG","r":"RYG"},"OLL 19":{"t":"YOYGYBGRR","b":"BYR","f":"OYB","l":"OYY","r":"GYY"},"OLL 20":{"t":"YRYBYGYOY","b":"OYO","f":"RYR","l":"GYG","r":"BYB"},"OLL 21":{"t":"BYBYYYGYG","b":"ORR","f":"OGR","l":"YBY","r":"YOY"},"OLL 22":{"t":"GYOYYYBYO","b":"ROY","f":"RBY","l":"YGY","r":"GRB"},"OLL 23":{"t":"YYYYYYRYG","b":"BBR","f":"YGY","l":"OOB","r":"GRO"},"OLL 24":{"t":"GYYYYYRYY","b":"YBO","f":"YGG","l":"OOB","r":"BRR"},"OLL 25":{"t":"GYYYYYYYB","b":"RBO","f":"GGY","l":"YOO","r":"BRR"},"OLL 26":{"t":"GYYYYYRYB","b":"RRG","f":"YGO","l":"YBB","r":"OOY"},"OLL 27":{"t":"RYGYYYYYO","b":"YOO","f":"BGY","l":"GRR","r":"YBB"},"OLL 28":{"t":"YYYYYGYBY","b":"BRB","f":"GYG","l":"OOO","r":"RYR"},"OLL 29":{"t":"RYYYYGRRY","b":"YBO","f":"YYO","l":"GOB","r":"BYG"},"OLL 30":{"t":"OYOYYGYBY","b":"GOB","f":"RYR","l":"YRG","r":"YYB"},"OLL 31":{"t":"BYYBYYOGY","b":"YOO","f":"YYG","l":"RYG","r":"BRR"},"OLL 32":{"t":"OBYGYYGYY","b":"YYB","f":"YOO","l":"BYR","r":"RRG"},"OLL 33":{"t":"GGYYYYRRY","b":"YYO","f":"YYG","l":"OOB","r":"BBR"},"OLL 34":{"t":"RGGYYYYRY","b":"BYO","f":"OYG","l":"YOB","r":"YBR"},"OLL 35":{"t":"YRRBYYBYY","b":"OYG","f":"YGR","l":"GYO","r":"YOB"},"OLL 36":{"t":"YROYYBRYY","b":"OYB","f":"YOG","l":"GGB","r":"YYR"},"OLL 37":{"t":"YYGYYGBBY","b":"RRO","f":"YYG","l":"BOO","r":"YYR"},"OLL 38":{"t":"RYYYYGYRO","b":"YOB","f":"OYG","l":"GBB","r":"RYY"},"OLL 39":{"t":"BBYYYYYOG","b":"OYB","f":"RYY","l":"YGG","r":"RRO"},"OLL 40":{"t":"YOBYYYGGY","b":"RYY","f":"OYG","l":"BBY","r":"ORR"},"OLL 41":{"t":"GYGYYGYRY","b":"YOY","f":"OYR","l":"OBB","r":"RYB"},"OLL 42":{"t":"YGYYYRBYB","b":"OYR","f":"YOY","l":"GBO","r":"GYR"},"OLL 43":{"t":"YYYYYOBRB","b":"OBR","f":"YYY","l":"GGO","r":"GYR"},"OLL 44":{"t":"YYOYYGYBO","b":"RRB","f":"RYG","l":"BOG","r":"YYY"},"OLL 45":{"t":"RGYYYYRRY","b":"BYO","f":"GYO","l":"YOY","r":"BBG"},"OLL 46":{"t":"YYOGYOYYO","b":"RBB","f":"RRG","l":"BYG","r":"YYY"},"OLL 47":{"t":"OYBRYYOOG","b":"YBR","f":"YYR","l":"BYG","r":"YGY"},"OLL 48":{"t":"BORBYGGRR","b":"OYY","f":"OYY","l":"YYY","r":"BYG"},"OLL 49":{"t":"RRGYYGRYB","b":"YYO","f":"YBO","l":"GOB","r":"YYY"},"OLL 50":{"t":"RYGYYBRRB","b":"YGO","f":"YYO","l":"GOB","r":"YYY"},"OLL 51":{"t":"OGBYYYORG","b":"YYR","f":"YYR","l":"BOG","r":"YBY"},"OLL 52":{"t":"BYOOYRGYO","b":"YBB","f":"YGG","l":"RYR","r":"YYY"},"OLL 53":{"t":"BRBBYYGYG","b":"OYR","f":"OGR","l":"YYY","r":"YOY"},"OLL 54":{"t":"BYBGYYGRG","b":"OBR","f":"OYR","l":"YYY","r":"YOY"},"OLL 55":{"t":"GYBGYROYO","b":"ROR","f":"BBG","l":"YYY","r":"YYY"},"OLL 56":{"t":"BGBYYYGRG","b":"OYR","f":"OYR","l":"YOY","r":"YBY"},"OLL 57":{"t":"YGYYYYYRY","b":"BYB","f":"GYG","l":"OOO","r":"RBR"},"T-Perm":{"t":"YYYYYYYYY","b":"BBR","f":"GGR","l":"ORO","r":"GOB","a":[[0,1,2,1,1],[2,0,2,2,1]]},"Y-Perm":{"t":"YYYYYYYYY","b":"GOB","f":"GGB","l":"RBO","r":"RRO","a":[[0,0,2,2,1],[0,1,1,0,1]]},"Ua-Perm":{"t":"YYYYYYYYY","b":"BBB","f":"GRG","l":"OGO","r":"ROR","a":[[0,1,1,2,0],[1,2,2,1,0],[2,1,0,1,0]]},"Ub-Perm":{"t":"YYYYYYYYY","b":"BBB","f":"GOG","l":"ORO","r":"RGR","a":[[0,1,2,1,0],[1,2,0,1,0],[2,1,1,2,0]]},"H-Perm":{"t":"YYYYYYYYY","b":"BGB","f":"GBG","l":"ORO","r":"ROR","a":[[0,1,2,1,1],[1,0,1,2,1]]},"Z-Perm":{"t":"YYYYYYYYY","b":"RGR","f":"OBO","l":"BOB","r":"GRG","a":[[0,0,2,0,0],[0,2,0,0,0],[1,0,1,2,1],[2,0,2,2,0],[2,2,0,2,0]]},"Aa-Perm":{"t":"YYYYYYYYY","b":"RBR","f":"GGB","l":"BOO","r":"GRO","a":[[0,0,2,0,0],[2,0,2,2,0],[2,2,0,0,0]]},"Ab-Perm":{"t":"YYYYYYYYY","b":"GBO","f":"GGR","l":"ROO","r":"BRB","a":[[0,0,2,2,0],[2,0,0,0,0],[2,2,2,0,0]]},"Ja-Perm":{"t":"YYYYYYYYY","b":"BRR","f":"GGR","l":"OOO","r":"GBB","a":[[1,0,2,1,1],[2,0,2,2,1]]},"Jb-Perm":{"t":"YYYYYYYYY","b":"RRG","f":"OGG","l":"BBB","r":"OOR","a":[[0,0,2,0,0],[0,1,1,0,0],[0,2,0,0,0],[1,0,2,1,0],[2,0,0,2,0],[2,1,0,1,0]]},"Ra-Perm":{"t":"YYYYYYYYY","b":"RBG","f":"OOG","l":"BRB","r":"OGR","a":[[0,0,2,0,0],[0,1,2,1,0],[0,2,0,0,0],[1,2,0,1,0],[2,0,0,2,0],[2,1,1,2,0]]},"Rb-Perm":{"t":"YYYYYYYYY","b":"OOB","f":"RGB","l":"GRG","r":"RBO","a":[[0,0,0,2,0],[0,1,2,1,0],[0,2,2,2,0],[1,0,0,1,0],[2,1,1,0,0],[2,2,0,0,0]]},"F-Perm":{"t":"YYYYYYYYY","b":"BGR","f":"GBR","l":"OOO","r":"GRB","a":[[1,0,1,2,1],[2,0,2,2,1]]},"V-Perm":{"t":"YYYYYYYYY","b":"GRB","f":"GGB","l":"ROO","r":"RBO","a":[[0,0,2,2,1],[1,0,2,1,1]]},"E-Perm":{"t":"YYYYYYYYY","b":"OBR","f":"OGR","l":"GOB","r":"GRB","a":[[0,0,0,2,1],[2,0,2,2,1]]}};
+let algSet="oll",learned={};
+try{learned=JSON.parse(localStorage.getItem("cuberhub.learned")||"{}")}catch(e){}
+function pic(x,sz){
+  const d=DIAG[x.n];
+  if(!d)return '<span class="nopic"></span>';
+  const pll=x.g==="pll",P={Y:"#ffd500",W:"#f4f4f4",G:"#1fb85a",B:"#2f6fe4",R:"#e63b2e",O:"#ff8a1f"};
+  const col=c=>pll?P[c]:(c==="Y"?P.Y:"#5b6678");
+  const r=(px,py,w,h,c)=>'<rect x="'+px+'" y="'+py+'" width="'+w+'" height="'+h+'" rx="2" fill="'+col(c)+'" stroke="#0b111a"/>';
+  let v='<svg viewBox="0 0 82 82" width="'+(sz||64)+'" height="'+(sz||64)+'" role="img" aria-label="'+x.n+' case diagram"><defs><marker id="ah" viewBox="0 0 6 6" refX="5" refY="3" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L6 3L0 6z" fill="#111"/></marker></defs>';
+  for(let i=0;i<9;i++)v+=r(15+i%3*18,15+Math.floor(i/3)*18,16,16,d.t[i]);
+  for(let i=0;i<3;i++)v+=r(15+i*18,3,16,8,d.b[i])+r(15+i*18,71,16,8,d.f[i])+r(3,15+i*18,8,16,d.l[i])+r(71,15+i*18,8,16,d.r[i]);
+  if(pll)(d.a||[]).forEach(a=>{
+    v+='<line x1="'+(23+a[0]*18)+'" y1="'+(23+a[1]*18)+'" x2="'+(23+a[2]*18)+'" y2="'+(23+a[3]*18)+'" stroke="#111" stroke-width="2.4" marker-end="url(#ah)"'+(a[4]?' marker-start="url(#ah)"':'')+'/>';
+  });
+  return v+'</svg>';
+}
+function renderAlgs(){
+  document.querySelectorAll("[data-set]").forEach(b=>b.classList.toggle("on",b.dataset.set===algSet));
+  const list=ALGS.filter(x=>x.g===algSet);
+  $("algList").innerHTML=list.map(x=>{
+    const done=learned[x.n]?"done":"";
+    return '<div class="alg '+done+'"><input type="checkbox" data-n="'+x.n+'" '+(learned[x.n]?"checked":"")+' aria-label="Mark '+x.n+' as learned">'+pic(x)+'<span class="nm">'+x.n+'</span><span class="mv">'+x.a+'</span><button class="btn" data-c="'+x.a+'">Copy</button></div>';
+  }).join("");
+  const got=list.filter(x=>learned[x.n]).length;
+  $("algCount").textContent=got+" of "+list.length+" learned";
+  $("algList").querySelectorAll("input").forEach(i=>i.onchange=()=>{
+    if(i.checked)learned[i.dataset.n]=1;else delete learned[i.dataset.n];
+    try{localStorage.setItem("cuberhub.learned",JSON.stringify(learned))}catch(e){}
+    renderAlgs();
+  });
+  $("algList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{
+    navigator.clipboard&&navigator.clipboard.writeText(b.dataset.c);
+    b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1000);
+  });
+}
+document.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{algSet=b.dataset.set;renderAlgs();});
+
+// ---------- trainer ----------
+let trSet="oll",trCur=null,trState="ready",trT0=0,trRaf=0,trCount=0,trBest={};
+try{trBest=JSON.parse(localStorage.getItem("cuberhub.trainbest")||"{}")}catch(e){}
+function trPool(){
+  const p=ALGS.filter(x=>x.g===trSet&&DIAG[x.n]);
+  return $("trLearned").checked?p.filter(x=>learned[x.n]):p;
+}
+function nextCase(){
+  cancelAnimationFrame(trRaf);
+  const p=trPool();
+  trState="ready";
+  $("trTime").textContent="0.00";$("trAlg").textContent="";
+  $("trCount").textContent=trCount+" cases this session";
+  if(!p.length){
+    trCur=null;
+    $("trCase").innerHTML='<p class="empty">No learned cases in this set yet. Tick some on the Algorithms page, or untick the box above.</p>';
+    $("trInfo").textContent="";return;
+  }
+  let c;
+  do{c=p[Math.floor(Math.random()*p.length)];}while(p.length>1&&trCur&&c.n===trCur.n);
+  trCur=c;
+  $("trCase").innerHTML=pic(c,220)+'<div class="trname" id="trName">?</div>';
+  $("trInfo").textContent="Look at the case, then press space to start.";
+}
+function reveal(){
+  if(!trCur)return;
+  $("trName").textContent=trCur.n;$("trAlg").textContent=trCur.a;
+}
+function trTick(){$("trTime").textContent=fmt(performance.now()-trT0);trRaf=requestAnimationFrame(trTick);}
+function trAction(){
+  if(!trCur){nextCase();return;}
+  if(trState==="ready"){
+    trState="running";trT0=performance.now();$("trAlg").textContent="";
+    $("trInfo").textContent="Solve it, then press space to stop.";trTick();
+  }else if(trState==="running"){
+    cancelAnimationFrame(trRaf);
+    const ms=performance.now()-trT0,b=trBest[trCur.n];
+    trState="done";trCount++;
+    $("trTime").textContent=fmt(ms);
+    let msg;
+    if(b==null||ms<b){
+      trBest[trCur.n]=ms;msg=b==null?"First time on this case.":"New best for this case!";
+      try{localStorage.setItem("cuberhub.trainbest",JSON.stringify(trBest))}catch(e){}
+    }else msg="Your best on this case: "+fmt(b)+".";
+    $("trInfo").textContent=msg+" Press space for the next case.";
+    $("trCount").textContent=trCount+" cases this session";
+    reveal();
+  }else nextCase();
+}
+const trainerOn=()=>$("trainer").classList.contains("on");
+document.addEventListener("keydown",e=>{
+  if(trainerOn()&&e.code==="Space"){e.preventDefault();if(!e.repeat)trAction();}
+});
+document.addEventListener("keyup",e=>{if(trainerOn()&&e.code==="Space")e.preventDefault();});
+$("trTime").onclick=trAction;
+$("trReveal").onclick=reveal;
+$("trNext").onclick=()=>{trState="ready";nextCase();};
+$("trLearned").onchange=nextCase;
+document.querySelectorAll("[data-tr]").forEach(b=>b.onclick=()=>{
+  trSet=b.dataset.tr;trCur=null;
+  document.querySelectorAll("[data-tr]").forEach(o=>o.classList.toggle("on",o===b));
+  nextCase();
+});
+
+// ---------- F2L ----------
+const F2L={"F2L 1":{"c":{"row":2,"col":2,"u":"R","s":["W","G"]},"e":{"row":0,"col":1,"u":"G","s":"R","dir":"B"},"desc":"Corner & edge paired on top, different colours up"},"F2L 2":{"c":{"row":2,"col":2,"u":"G","s":["W","R"]},"e":{"row":1,"col":0,"u":"R","s":"G","dir":"L"},"desc":"Corner & edge paired on top (mirror)"},"F2L 3":{"c":{"row":2,"col":2,"u":"R","s":["W","G"]},"e":{"row":2,"col":1,"u":"R","s":"G","dir":"F"},"desc":"Corner & edge paired on top, same colour up"},"F2L 4":{"c":{"row":2,"col":2,"u":"G","s":["W","R"]},"e":{"row":1,"col":2,"u":"G","s":"R","dir":"R"},"desc":"Corner & edge paired on top (mirror)"},"F2L 5":{"c":{"slot":1,"bottom":"W","s":["G","R"]},"e":{"row":2,"col":1,"u":"R","s":"G","dir":"F"},"desc":"Corner already in slot, edge on top"},"F2L 6":{"c":{"slot":1,"bottom":"R","s":["W","G"]},"e":{"row":2,"col":1,"u":"R","s":"G","dir":"F"},"desc":"Corner on top (white up), edge in slot"}};
+const PP={W:"#f4f4f4",Y:"#ffd500",G:"#1fb85a",B:"#2f6fe4",R:"#e63b2e",O:"#ff8a1f"};
+function f2lPic(n){
+  const d=F2L[n];
+  let v='<svg viewBox="0 0 82 82" width="90" height="90"><rect width="82" height="82" fill="none"/>';
+  const cell=(r,c)=>[9+c*22,9+r*22];
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){
+    const[x,y]=cell(r,c);
+    const dash=(r===2&&c===2)?' stroke-dasharray="3 2"':'';
+    v+='<rect x="'+x+'" y="'+y+'" width="20" height="20" rx="2" fill="#28374a" stroke="#0b111a"'+dash+'/>';
+  }
+  function put(r,c,up,sideColor,dir){
+    const[x,y]=cell(r,c);
+    v+='<rect x="'+x+'" y="'+y+'" width="20" height="20" rx="2" fill="'+PP[up]+'" stroke="#0b111a"/>';
+    if(sideColor){
+      const m={F:[x+5,y+15],B:[x+5,y-1],L:[x-1,y+5],R:[x+15,y+5]}[dir]||[x+5,y+15];
+      v+='<rect x="'+m[0]+'" y="'+m[1]+'" width="10" height="6" fill="'+PP[sideColor]+'" stroke="#0b111a" stroke-width="0.6"/>';
+    }
+  }
+  if(d.c.slot){
+    const[x,y]=cell(2,2);
+    v+='<rect x="'+(x+4)+'" y="'+(y+4)+'" width="12" height="12" fill="'+PP[d.c.bottom]+'" stroke="#0b111a"/>';
+  }else put(d.c.row,d.c.col,d.c.u,d.c.s[0],d.c.row<1?"B":(d.c.col<1?"L":"R"));
+  if(d.e.slot){
+    const[x,y]=cell(2,2);
+    v+='<rect x="'+(x-2)+'" y="'+(y+8)+'" width="8" height="8" fill="'+PP[d.e.s[0]]+'" stroke="#0b111a"/>';
+  }else put(d.e.row,d.e.col,d.e.u,d.e.s,d.e.dir);
+  return v+'</svg>';
+}
+function renderF2L(){
+  $("f2lList").innerHTML=Object.keys(F2L).map(n=>{
+    const x=ALGS.find(a=>a.n===n);
+    return '<div class="f2lcard">'+f2lPic(n)+'<div><div class="nm" style="font-weight:700">'+n+'</div><div class="desc">'+F2L[n].desc+'</div></div><div class="mv scr" style="min-height:auto">'+x.a+'</div><button class="btn" data-c="'+x.a+'">Copy</button></div>';
+  }).join("");
+  $("f2lList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{
+    navigator.clipboard&&navigator.clipboard.writeText(b.dataset.c);
+    b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1000);
+  });
+}
+renderWelcome();
+renderMoves();
+
+// ---------- theme ----------
+let theme="dark";
+try{theme=localStorage.getItem("cuberhub.theme")||"dark"}catch(e){}
+function applyTheme(t){
+  theme=t;document.documentElement.setAttribute("data-theme",t);
+  $("setTheme").value=t;
+  try{localStorage.setItem("cuberhub.theme",t)}catch(e){}
+}
+$("setTheme").onchange=()=>applyTheme($("setTheme").value);
+applyTheme(theme);
+
+// ---------- reset data ----------
+$("setReset").onclick=()=>{
+  if(!confirm("Delete all solves, learned algorithms and trainer best times? This cannot be undone."))return;
+  ["cuberhub.solves","cuberhub.learned","cuberhub.trainbest"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  solves=[];learned={};trBest={};
+  renderWelcome();
+  if($("stats").classList.contains("on"))renderStats();
+  if($("algs").classList.contains("on"))renderAlgs();
+  $("setResetMsg").textContent="All data cleared.";
+  setTimeout(()=>$("setResetMsg").textContent="",2500);
+};
+</script>
+</body>
+</html>
